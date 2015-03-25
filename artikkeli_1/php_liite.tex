@@ -1,0 +1,22 @@
+\section{PHP:n varatut sanat ja literaalivakiot}
+PHP-kielen varattuja sanoja ovat~ \cite{man_php_kws}:
+\\
+\textbf{
+\_\_halt\_compiler(),  abstract, and, array(), as, break, callable, case, catch, class,
+clone, const,  continue, declare, default,  die(), do, echo, else, elseif, empty(),   enddeclare, endfor, endforeach, endif, endswitch, endwhile, eval(), exit(), extends
+final, finally, for, foreach, function, global, goto, if, implements, include, include\_once, instanceof, insteadof, interface, isset(), list(), namespace, new, or,      print, private, protected, public, require, require\_once, return, static, switch, throw, trait, try, unset(), use, var, while
+}
+\par
+PHP-kielen kokonais- ja liukulukuliteraalien säännölliset ovat:~\cite{man_php_types_float}
+\\
+Kokonaisluvut \\
+Desimaali : [1-9][0-9]*| 0 \\
+Heksadesimaali : 0[xX][0-9a-fA-F]+ \\
+Oktaali: 0[0-7]+ \\
+Binääri: 0b[01]+ \\
+Kokonaisluku: [+-]?desimaali | [+-]?heksadesimaali| [+-]?oktaali| [+-]?binääri \\
+
+Liukuluvut:\\
+LNUM          [0-9]+ \\
+DNUM          ([0-9]*[\.]{LNUM}) | ({LNUM}[\.][0-9]*) \\
+Eksponentti_DNUM [+-]?(({LNUM} | {DNUM}) [eE][+-]? {LNUM}) \\

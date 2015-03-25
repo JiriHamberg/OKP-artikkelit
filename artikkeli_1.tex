@@ -30,12 +30,7 @@
     morestring=[b]",
     stringstyle=\color{redstrings}
 }
-
-%\lstset{
-%  literate={ö}{{\"o}}1
-%           {ä}{{\"a}}1
-%           {ü}{{\"u}}1
-%}
+\lstset{showstringspaces=false}
 
 % Automatically set the PDF metadata fields
 \makeatletter
@@ -100,12 +95,15 @@
 
 \include{artikkeli_1/johdanto}
 \include{artikkeli_1/toteutus}
-%\include{artikkeli_1/alkiorakenne_ja_syntaksi}
+\include{artikkeli_1/alkiorakenne_ja_syntaksi}
 \include{artikkeli_1/esimerkit}
 
 \bibliographystyle{babplain-lf}
 %\bibliographystyle{babalpha-lf}
 \bibliography{references-fi}
 
+\newpage
+\appendix
+\include{artikkeli_1/php_liite}
 
 \end{document}

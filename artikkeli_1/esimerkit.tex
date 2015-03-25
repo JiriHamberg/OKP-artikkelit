@@ -1,4 +1,4 @@
-\section{Esimerkkejä}
+\section{Esimerkkeohjelmat}
 
  \lstset{%
         inputencoding=utf8,
@@ -19,12 +19,17 @@
 	columns=fullflexible
 }
 
-
+Toteutetaan sekä PHP:llä että F\#:lla esimerkkiohjelma, joka saa syötteenään luvun ja tulostaa ensimmäisen Fibonaccin lukun, joka suurempi kuin syötteenä saatu luku.
+\par
+F\#:
 \lstinputlisting{artikkeli_1/fibo.fs}
 \par
 Esimerkkiohjelma PHP:llä. Ensimmäinen esimerkki on rekursiivinen toteutus funktiosta, joka hakee $\$min\_value$-parametri:a suuremman fibonaccin luvun. 
 
-\lstset{language=PHP}
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
 \begin{lstlisting}
 function fibonacci($first, $second, $min_value) {
     if($first + $second <= $min_value) {
@@ -35,8 +40,8 @@ function fibonacci($first, $second, $min_value) {
 \end{lstlisting}
 
 Funktiolle annetaan kolme parametria, joista kaksi ensimmäistä ovat fibonaccin lukujonoon kuuluvia lukuja. Funktiota kutsutaan esimerkiksi seuraavasti:
-\[ \$next_fib = fibonacci(0, 1, 5); \]
-Muuttujan $\$next_fib$ arvoksi tulee tässä tapauksessa 8.
+\[ \$next\_fib = fibonacci(0, 1, 5); \]
+Muuttujan $\$next\_fib$ arvoksi tulee tässä tapauksessa 8.
 Funktiosta voi myös tehdä iteratiivisen version, joka vastaanottaa vain yhden parametrin.
 
 \begin{lstlisting}

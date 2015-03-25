@@ -1,0 +1,69 @@
+\section{Alkiorakenne ja syntaksi}
+
+\subsection{F\#}
+F\# on moniparadigmainen kieli, joka on saanut vaikutteita muun muassa Pythonista, C\#:sta, Scalasta ja erityisesti ML-kieliperheen kielistä, joten sen syntaksi eroaa paljon C-perheen kielistä.
+
+F\#:n paradigma noudattaa pitkälti funktionaalista tyyliä.
+Muuttujien ja vakioiden määrittely käy alkion let avulla. Esimerkiksi \textit{let x = 5} määrittelee vakion \textit{x}, jonka arvoksi asetetaan 5. Muuttujien määrittelemiseen on käytettävä \textit{let}-avainsanan lisäksi \textit{mutable}-avainsanaa. Lisäksi muuttujan arvon vaihtamiseksi käytetään \textit{<-} sijoitusoperaattoria yhtäsuuruusmerkin sijaan. Esimerkiksi \textit{x <- 7} asettaa \textit{x}:lle arvon 7.
+
+Funktioiden määritteleminen tehdään myös \textit{let}-avainsanan avulla (ks. luku 4, F\#:n koodiesimerkit). Lohkot toteutetaan sisennyksillä, eli C-perheen kielissä vaadittuja aaltosulkeita ei käytetä. Poikkeuksena on myös puolipisteen puuttuminen.
+
+F\# sisältää myös lukuisia literaalityyppejä. Esimerkiksi lista, joka sisältää luvut 1-4 voidaan määritellä literaalilla \textit{[1;2;3;4]}. Taulukot sen sijaan määritellään käyttäen hakasulkeita ja |-merkkiä. Esimerkiksi \textit{let array = [|1,2,3,4|]}. Kaikkien alkioiden on oltava samaa tyyppiä. C:n ja Javan kaltaisiin kieliin tottuneille ohjelmoijille saattaa tämänkaltaiset literaalit voivat aiheuttaa hämmennystä.
+
+Sekvenssit, eli “laiskat listat” ovat myös mahdollisia F\#:ssa. Sekvenssit ovat listan kaltaisia tietorakenteita. Listoista poiketen ne eivät kuitenkaan sisällä alkiota, vaan, toimintaohjeet tarvitun alkion tuottamiseksi. Haettu alkio lasketaan siis ohjeiden mukaan, kun sekvenssistä haetaan tätä. Tämä mahdollistaa esimerkiksi äärettömän pitkät sekvenssit, kuten kappaleen 4 esimerkkiohjelmassa.  
+    
+F\# tukee lukuisia lukuarvotyyppejä ja monille näistä on myös olemassa omat literaalivakionsa. Paljas lukuarvo tulkitaan 32-bitin etumerkilliseksi kokonaisluvuksi. Esimerkiksi etumerkitön 16-bitin kokonaisluku voitaisiin antaa literaalina \textit{123u}s ja rajoittamattoman mittaisia bigint-tyypin arvoja vastaavat I-päätteiset kokonaislukuliteraalit, kuten \textit{123I}.
+
+Type-avainsanan avulla on mahdollista luoda omia tyyppejä. Seuraavassa esimerkissä määritellään luokka Person.
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+\begin{lstlisting}
+type Person(name : string, age : int) =
+	member x.Name = name
+	member x.Age = age
+	member x.Greet (p : Person) = 
+		printfn "Hi %s, my name is %s" p.Name x.Name    
+\end{lstlisting}
+
+Luokalle määritellään kenttiä ja metodeita \textit{member}-avainsanalla. \textit{Member}-sanaa seuraa alias-osa, tässä \textit{x}, joka viittaa kentän määrittelevässä lausekkeessa luokan ilmentymään. Alias vastaa siis käyttötarkoitukseltaan muiden oliokielten avainsanoja \textit{self} tai \textit{this}, mutta sen ulkoasu on ohjelmoijan määriteltävissä~\cite{wiki_fs_programming}. 
+Person-luokasta voidaan luoda uusi ilmentymä olio-ohjelmoinnille tyypillisellä avainsanalla \textit{new}:
+
+\begin{lstlisting}
+let a = new Person("Aapeli", 22)
+\end{lstlisting}
+
+Metodeita kutsutaan kuten muitakin funktioita, esimerkiksi:
+
+\begin{lstlisting}
+a.Greet a //Tulostaa "Hi Aapeli, my name is Aapeli"
+\end{lstlisting}
+
+\subsection{PHP}
+PHP:n kuuluu syntaksiltaan C-kieliperheeseen, esimerkiksi funktiokutsusyntaksi ja lohkosyntaksi ovat identtisiä C:n tai Javan kanssa. Kielen varatut sanat on listattu liitteessä A. Varatuista sanoista ehkä mielenkiintoisin on \textit{\_\_halt\_compiler()}, joka pysäyttää kääntäjän. Kääntäjän näkökulmasta tiedosto ikään kuin lakkaa siihen kohtaa mihin tämä varattu sana on kirjoitettu. Tämä mahdollistaa sen, että kutsukohdan jälkeen tiedostoon voi sijoittaa mielivaltaista sisältöä, esimerkiksi binääridataa. Näin periaatteessa koodi ja sen lähdedata voidaan sijoittaa samaan tiedostoon; eri asia luonnollisesti on se, että onko tämä millään tasolla järkevää.
+
+Sisennykset eivät ole semanttisesti merkitseviä PHP:ssä. Muuttujat  määritellään \$-merkillä kuten bash-skripteissä tai Perlissä. Esimerkiksi \textit{\$university  = “HY”} luo university-nimisen muuttujan, jonka arvoksi asetetaan merkkijono “HY”. Muuttujilla ei ole myöskään tyyppiä kuten F\#:ssa, vaan kieli on dynaamisesti tyypitetty. Merkkijonot voidaan määrittää joko “ tai ‘-lainausmerkeillä. Numerovakioiden tarkka rakenne löytyy liitteestä A. Oudosti vakiot määritellään luokan ulkopuolella define(“nimi”, “arvo”)-syntaksilla kun taas luokkien sisällä käytetään const nimi = arvo -syntaksia.
+
+Luokat määritellään kuten Javassa ja  olioilla on viittesemantiikka. PHP:n metodit poikkeavat Javassa siinä, että jokaista voi kutsua myös ilman, että luokasta tehdään instanssi. Javassa luokkametodit määritellään static-avainsanalla. PHP:n static-avainsana määrittelee vain sen, että metodit voivat käyttää vain luokan muita staattisia kenttiä. Esimerkiksi seuraavan koodinpätkän non\_static-metodia voidaan kutsua ilman olioilmentymää. Koska tämä metodi ei käytä oliomuuttujia, tämä kutsu toimii oikein tässä tapauksessa. 
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+\begin{lstlisting}
+class Foo {
+    public function non_static() {
+        echo "instance method";
+    }
+    public static function static() {
+        echo "class method";
+    }
+}
+
+Foo::non_static(); // tulostaa “instance method”
+\end{lstlisting}
