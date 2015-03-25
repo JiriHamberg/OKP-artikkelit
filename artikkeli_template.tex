@@ -1,0 +1,99 @@
+% --- Template for thesis / report with tktltiki2 class ---
+% 
+% last updated 2013/02/15 for tkltiki2 v1.02
+
+\documentclass[finnish, grading]{tktltiki2}
+
+% --- General packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx}
+\usepackage[pdftex,hidelinks]{hyperref}
+\usepackage{cancel}
+
+% Automatically set the PDF metadata fields
+\makeatletter
+\AtBeginDocument{\hypersetup{pdftitle = {\@title}, pdfauthor = {\@author}}}
+\makeatother
+
+% --- Language-related settings ---
+\usepackage[finnish, fixlanguage]{babelbib}
+\selectbiblanguage{finnish}
+
+% add bibliography to the table of contents
+\usepackage[nottoc]{tocbibind}
+% tocbibind renames the bibliography, use the following to change it back
+\settocbibname{Lähteet}
+
+% --- Theorem environment definitions ---
+\newtheorem{lau}{Lause}
+\newtheorem{lem}[lau]{Lemma}
+\newtheorem{kor}[lau]{Korollaari}
+\theoremstyle{definition}
+\newtheorem{maar}[lau]{Määritelmä}
+\newtheorem{ong}{Ongelma}
+\newtheorem{alg}[lau]{Algoritmi}
+\newtheorem{esim}[lau]{Esimerkki}
+\theoremstyle{remark}
+\newtheorem*{huom}{Huomautus}
+
+
+% --- tktltiki2 options ---
+%
+% The following commands define the information used to generate title and
+% abstract pages. The following entries should be always specified:
+
+\title{Ohelmointikielten periaatteet \\ F\# ja PHP}
+\author{Jiri Hamberg, Kristian Hansson ja Erkka Kääriä}
+\date{\today}
+\level{Kurssityö}
+%\level{Kandidaatintutkielma}
+
+\abstract{}
+
+% The following can be used to specify keywords and classification of the paper:
+
+\keywords{}
+
+% classification according to ACM Computing Classification System (http://www.acm.org/about/class/)
+% This is probably mostly relevant for computer scientists
+% uncomment the following; contents of \classification will be printed under the abstract with a title
+% "ACM Computing Classification System (CCS):"
+% \classification{}
+
+% If the automatic page number counting is not working as desired in your case,
+% uncomment the following to manually set the number of pages displayed in the abstract page:
+%
+% \numberofpagesinformation{16 sivua + 10 sivua liitteissä}
+
+% \faculty{Matemaattis-luonnontieteellinen}
+\department{Tietojenkäsittelytieteen laitos}
+% \subject{Tietojenkäsittelytiede}
+\university{Helsingin Yliopisto}
+\city{Helsinki}
+
+\renewcommand{\baselinestretch}{1.5}
+
+\begin{document}
+
+%\setlength{\parskip}{0.3cm}
+% --- Front matter ---
+
+\frontmatter       	% roman page numbering for front matter
+\maketitle			% title page
+%\makeabstract		% abstract page
+\tableofcontents  	% table of contents
+\mainmatter			% clear page, start arabic page numbering
+
+%\include{}
+%\include{}
+%\include{}
+%\include{}
+
+\bibliographystyle{babalpha-lf}
+\bibliography{references-fi}
+
+
+\end{document}
