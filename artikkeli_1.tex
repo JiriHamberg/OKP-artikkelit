@@ -12,6 +12,30 @@
 \usepackage{amsfonts,amsmath,amssymb,amsthm,booktabs,color,enumitem,graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cancel}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{turqusnumbers}{rgb}{0.17,0.57,0.69}
+\definecolor{redstrings}{rgb}{0.5,0,0}
+
+\lstdefinelanguage{FSharp}
+                {morekeywords={let, new, match, with, rec, open, module, namespace, type, of, member, and, for, in, do, begin, end, fun, function, try, mutable, if, then, else},
+    keywordstyle=\color{bluekeywords},
+    sensitive=false,
+    morecomment=[l][\color{greencomments}]{///},
+    morecomment=[l][\color{greencomments}]{//},
+    morecomment=[s][\color{greencomments}]{{(*}{*)}},
+    morestring=[b]",
+    stringstyle=\color{redstrings}
+}
+
+%\lstset{
+%  literate={ö}{{\"o}}1
+%           {ä}{{\"a}}1
+%           {ü}{{\"u}}1
+%}
 
 % Automatically set the PDF metadata fields
 \makeatletter
@@ -46,7 +70,7 @@
 % The following commands define the information used to generate title and
 % abstract pages. The following entries should be always specified:
 
-\title{Ohelmointikielten periaatteet \\ F\# ja PHP}
+\title{Ohelmointikielten periaatteet \\ F$\#$ ja PHP}
 \author{Jiri Hamberg, Kristian Hansson ja Erkka Kääriä}
 \date{\today}
 \level{Kurssityö}
@@ -75,9 +99,9 @@
 \mainmatter			% clear page, start arabic page numbering
 
 \include{artikkeli_1/johdanto}
-%\include{}
-%\include{}
-%\include{}
+\include{artikkeli_1/toteutus}
+%\include{artikkeli_1/alkiorakenne_ja_syntaksi}
+\include{artikkeli_1/esimerkit}
 
 \bibliographystyle{babplain-lf}
 %\bibliographystyle{babalpha-lf}
