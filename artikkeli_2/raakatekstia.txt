@@ -1,0 +1,193 @@
+
+Lohkorakenne
+
+PHP:n lohkorakenne on litte‰. Funktioita voidaan kyll‰ m‰‰ritt‰‰ toisten funktioiden sis‰ll‰ mutta ohjelma k‰ytt‰ytyy kuin ne olisi m‰‰ritelty per‰j‰lkeen [1]. Esimerkiksi seuraava koodi
+
+function x() {
+  function y() {
+  }
+}
+
+k‰ytt‰ytyy kuin
+
+function x() {
+}
+
+function y() {
+}
+
+  
+TODO ñ lis‰‰ php:st‰ t‰h‰n
+
+
+F#:ssa lohkorakenne sen sijaan on aidosti syv‰: seuraavassa koodissa 
+
+let outside a =
+    let inside b = 
+       b + 5
+    inside a
+
+[<EntryPoint>] 
+let main argv =
+    printfn "%A" (outside 25) 
+    printfn "%A" (inside b) // k‰‰nnˆsvirhe
+    0 
+
+m‰‰ritell‰‰n funktio outside, ja sen sis‰ll‰ funktio inside. Ensimm‰inen main-funktion tulostus tulostaa tekstin "30", kun taas j‰lkimm‰inen johtaa k‰‰nnˆsvirheeseen koska funktio inside on olemassa vain funktion outside m‰‰rittelyalueen sis‰ll‰.
+
+Myˆs samannimisten muuttujien m‰‰rittely onnistuun sisemmiss‰ lohkoissa. Esimerkiksi seuraava koodi
+
+let printer input =
+  let b = 25
+  printfn "%A" b # tulostaa 25
+  if input % 2 = 0 then # tarkistetaan parillisuus
+    let b = 70
+    printfn "%A" b # tulostaa 70
+  printfn "%A" b # tulostaa 25
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+    printer 10
+    0 
+
+tulostaa 25 70 25
+
+Sidonta
+
+F#:n muuttujasidonta on staattinen. Seuraava koodi
+
+let global_var = 666
+
+let binding_test () = 
+    printfn "%A" global_var
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+    printfn "%A" global_var
+    let global_var = 123
+    printfn "%A" global_var
+    binding_test()
+    0 
+
+
+Tulostaa 666 123 666
+
+Mielenkiintoisena sivuhuomiona F#:ssa ei ole parametrittomia funktioita. Yll‰olevan koodin funktion binding_test m‰‰rittely oli aluksi
+
+let binding_test = printfn "%A" global_var
+
+T‰m‰ ei kuitenkaan m‰‰rittele funktiota binding_test vaan globaalin vakion binding_test, joka saa arvoksi funktion printfn paluuarvon eli Unitin. T‰m‰ johtaa arvon 666 tulostamiseen ennen main-funktion suorittamista. Jos funktiolle ei haluta v‰litt‰‰ arvoja, t‰ytyy sen formaaliksi parametriksi antaa Unit, joka ilmaistaan sulkeilla (). Vastaavasti kutsukohdassa on  todelliseksi parametriksi annettava Unit eli sulkeet.
+
+
+
+Kontrollin ohjaus
+
+
+
+F#:ssa ehtolause on muotoa 
+
+if ehto then 
+  koodia
+else if toinen_ehto then
+  lis‰‰ koodia
+else
+  viel‰ lis‰‰ koodia
+
+Operaattori = on vertailuoperaattori toisin kuin C-perheen kieliss‰. T‰ss‰ on syyt‰ muistaa ett‰ F#:ssa sisennykset ovat semanttisesti merkitsevi‰ ja ilmaisevat lohkorakenteen.
+
+Rekursiivinen funktio F#:ssa on merkitt‰v‰ avainsanalla rec. Esimerkiksi
+
+// tyhm‰ funktio joka palauttaa aina nolla
+let func a = 
+  if a = 0 then
+    a
+  else
+    func a - 1
+
+johtaa k‰‰nnˆsvirheeseen "func is not defined". Muuttamalla m‰‰rittely muotoon 
+
+let rec func a = 
+  loput koodista
+  
+k‰‰nt‰j‰ hyv‰ksyy koodin.
+
+
+F# tukee h‰nt‰rekursiota. Tutkimalla funktion 
+
+let rec func a = 
+  if a = 0 then
+    a
+  else
+    func (a - 1)
+    
+k‰‰nt‰j‰n generoimaa assembly-koodia, else-haarasta lˆydet‰‰n
+
+00CD0881  dec         dword ptr [ebp-4]  
+00CD0884  nop  
+00CD0885  jmp         00CD086D
+
+eli arvoa v‰hennet‰‰n yhdell‰ ja hyp‰t‰‰n funktion alkuun sen sijaan ett‰ kutsuttaisiin funktiota.
+
+Moniparadigmakielen‰ F# tukee myˆs perinteisempi‰ toistolauseita. While-silmukan rakenne on
+
+while ehto do
+  koodia
+  koodia
+
+ja esimerkiksi seuraava koodi tulostaa arvot v‰lill‰ [a, 0]
+
+let while_func a = 
+    let mutable counter = a // mutable-avainsana m‰‰rittelee counterin muuttujaksi eik‰ vakioksi
+    while counter >= 0 do
+        printfn "%A" counter
+        counter <- counter - 1 // <- on sijoitusoperaattori
+
+For-silmukka poikkeaa C-perheen vastaavasta [2]:
+
+// k‰y l‰pi arvot v‰lill‰ alku - loppu kasvavassa j‰rjestyksess‰
+for begin to end do  
+   koodia
+   
+// kuten yll‰, mutta laskevassa j‰rjestyksess‰
+for begin downto end do
+  koodia
+
+// voidaan k‰yd‰ l‰pi listan elementit; vastaa javan for (tyyppi muuttuja : kokoelma) - silmukkaa
+let list = [1; 5; 20]
+for value in list do 
+  // k‰yt‰ arvoja
+  
+// voidaan k‰ytt‰‰ myˆs arvov‰lej‰
+for value in 1 .. 20 do 
+  // arvot 1 - 20 k‰yd‰‰n l‰pi
+  
+// myˆs eri askelluksella
+for value in 1 .. 5 .. 20 do 
+  // 1, 6, 11, 16
+// alku-ja loppuehdot saavat olla myˆs lausekkeitya
+for value in func1 param .. 5 .. func2 param do
+  // k‰ytet‰‰n arvot
+
+Myˆs sekvenssej‰ voidaan hyˆdynt‰‰ for-silmukassa (esimerkki Microsoftin [2])
+
+let seq1 = seq { for i in 1 .. 10 -> (i, i*i) }
+for (a, asqr) in seq1 do
+  printfn "%d squared is %d" a asqr
+
+T‰m‰ tulostaa
+
+1 squared is 1
+2 squared is 4
+3 squared is 9
+4 squared is 16
+5 squared is 25
+6 squared is 36
+7 squared is 49
+8 squared is 64
+9 squared is 81
+10 squared is 100  
+
+1 http://stackoverflow.com/questions/1631535/function-inside-a-function
+2 https://msdn.microsoft.com/en-us/library/dd233227.aspx
