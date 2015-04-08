@@ -1,0 +1,328 @@
+\section{Lohkorakenne}
+
+ \lstset{%
+        inputencoding=utf8,
+            extendedchars=true,
+            literate=%
+            {å}{{\r{a}}}1
+			{ä}{{\"a}}1
+			{ö}{{\"o}}1
+			{Å}{{\r{A}}}1
+			{Ä}{{\"A}}1
+			{Ö}{{\"O}}1
+}
+
+PHP:n lohkorakenne on litteä. Funktioita voidaan kyllä määrittää toisten funktioiden sisällä mutta ohjelma käyttäytyy kuin ne olisi määritelty peräjälkeen~\cite{stackoverflow_1}. Esimerkiksi seuraava koodi
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+
+\begin{lstlisting}
+function x() {
+  function y() {
+  }
+}
+\end{lstlisting}
+
+käyttäytyy kuin
+
+\begin{lstlisting}
+function x() {
+}
+
+function y() {
+}
+\end{lstlisting}
+
+F\#:ssa lohkorakenne sen sijaan on aidosti syvä: seuraavassa koodissa
+
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+\begin{lstlisting}
+let outside a =
+    let inside b =
+           b + 5
+    inside a
+
+[<EntryPoint>]
+let main argv =
+    printfn "%A" (outside 25)
+    printfn "%A" (inside b) // käännösvirhe
+    0
+\end{lstlisting}
+
+määritellään funktio outside, ja sen sisällä funktio inside. Ensimmäinen main-funktion tulostus tulostaa tekstin "30", kun taas jälkimmäinen johtaa käännösvirheeseen koska funktio inside on olemassa vain funktion outside määrittelyalueen sisällä.
+
+Myös samannimisten muuttujien määrittely onnistuun sisemmissä lohkoissa. Esimerkiksi seuraava koodi
+
+\begin{lstlisting}
+let printer input =
+  let b = 25
+  printfn "%A" b # tulostaa 25
+  if input % 2 = 0 then # tarkistetaan parillisuus
+    let b = 70
+    printfn "%A" b # tulostaa 70
+  printfn "%A" b # tulostaa 25
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+    printer 10
+    0
+\end{lstlisting}
+
+tulostaa 25 70 25
+
+Sidonta
+
+PHP:ssa kaarisulkeet eivät muodosta näkyvyysalueita, vaan näkyvyysalueiden rajoina toimivat funktiot ja luokat. Funktiot pääsevät lähtökohtaisesti käsiksi vain omiin paikallisiin muuttujiinsa~\cite{man_php_scope}. Luokan paikallinen funktio pääsee lisäksi käsiksi luokan paikallisiin muutujiin this-avainsanan avulla. Seuraava ohjelmaesimerkki demonstroi muuttujien näkyvyyttä:
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+	
+\begin{lstlisting}
+$a = 1;
+
+function foo() {
+    $a = 3;
+    bar();
+}
+
+function bar() {
+    echo "a = " . $a . "\n";
+}
+
+foo();
+\end{lstlisting}
+
+Suoritettaessa tulostuu viesti
+
+“a =” ja PHP-tulkki antaa seuraavan varoituksen: PHP Notice:  Undefined variable: a
+
+Globaalin näkyvyysalueen muuttujiin päästään käsiksi global-avainsanaa käyttäen. Seuraavassa esimerkissä funktio bar käyttää globaalia muuttujaa a:
+
+\begin{lstlisting}
+$a = 1;
+
+function foo() {
+    $a = 3;
+    bar();
+}
+
+function bar() {
+    global $a;
+    echo "a = " . $a . "\n";
+}
+
+foo();
+\end{lstlisting}
+
+Suoritettaessa tulostuu: “a = 1”
+
+
+F\#:n muuttujasidonta on staattinen. Seuraava koodi
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+\begin{lstlisting}
+let global_var = 666
+
+let binding_test () =
+    printfn "%A" global_var
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+    printfn "%A" global_var
+    let global_var = 123
+    printfn "%A" global_var
+    binding_test()
+    0
+\end{lstlisting}
+
+Tulostaa 666 123 666
+
+Mielenkiintoisena sivuhuomiona F\#:ssa ei ole parametrittomia funktioita. Ylläolevan koodin funktion binding_test määrittely oli aluksi
+
+\begin{lstlisting}
+let binding_test = printfn "%A" global_var
+\end{lstlisting}
+
+Tämä ei kuitenkaan määrittele funktiota binding_test vaan globaalin vakion binding_test, joka saa arvoksi funktion printfn paluuarvon eli Unitin. Tämä johtaa arvon 666 tulostamiseen ennen main-funktion suorittamista. Jos funktiolle ei haluta välittää arvoja, täytyy sen formaaliksi parametriksi antaa Unit, joka ilmaistaan sulkeilla (). Vastaavasti kutsukohdassa on  todelliseksi parametriksi annettava Unit eli sulkeet.
+
+
+
+\section{Kontrollin ohjaus}
+
+PHP tukee kaikkia C-kieliperheelle tyypillisiä kontrollinohjausrakenteita, kuten if-elseif-else, switch, while, do-while, for, break, continue ja goto~\cite{man_php_control}. Funktioiden paluuarvot ilmaistaan eksplisiittisesti return-avainsanan avulla.
+\par
+Koska muuttujiin voidaan sijoittaa myös funktiota ja PHP tarjoaa tuen anonyymeille funktiolle~\cite{man_php_anon}, kontrollinohjaukseen voidaan soveltaa funktionaalista ohjelmointityyliä. Seuraavassa esimerkissä on käytetty anonyymeja funktiota yhdessä map- ja filter-funktioiden kanssa lukua 101 pienempien alkulukujen summan laskemiseksi:
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+
+\begin{lstlisting}
+$arr = range(100, 1, 1);
+
+$is_prime = function($n) {
+    if($n == 1) return false;
+    if($n == 2) return true;
+    for($i=2; $i <= sqrt($n); $i++) {
+        if($n % $i == 0)
+            return false;
+    }
+    return true;
+};
+
+$sum = function($state, $next) { return $state + $next; };
+$prime_sum = array_reduce(array_filter($arr, $is_prime), $sum);
+echo "sum = " . $prime_sum . "\n";
+\end{lstlisting}
+
+Aluksi luodaan taulukko arr, joka sisältää luvut yhdestä sataan ja muuttujaan is_prime sijoitetaan anonyymi funktio, joka ottaa parametrina yhden luvun ja palauttaa totuusarvon true jos ja vain jos parametri on alkuluku. Seuraavaksi taulukkoon arr sovelletaan array_filter funktiota suodatinfunktiolla is_prime. Filter-funktio kutsuu suodatinfunktiota vuorotellen kullakin taulukon arvolla ja poimii palautettavaan listaan ne alkiot, joilla suodatinfunktio palautti arvon true. Näin tuotettua lista sisältää siis kaikki alkuluvut jotka ovat pienempiä kuin 101. Tähän taulukkoon sovelletaan array_reduce-funktiota, reduktiofunktiolla sum, mikä palauttaa taulukon alkioiden summan. Lopuksi tulostetaan summa, joka on sijoitettu muuttujaan \$prime_sum. 
+\par
+Ohjelmaa suoritettaessa tulostuu: “sum = 1060” 
+
+\par
+
+F\#:ssa ehtolause on muotoa
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+\begin{lstlisting}
+if ehto then
+  koodia
+else if toinen_ehto then
+  lisää koodia
+else
+  vielä lisää koodia
+\end{lstlisting}
+
+Operaattori = on vertailuoperaattori toisin kuin C-perheen kielissä. Tässä on syytä muistaa että F\#:ssa sisennykset ovat semanttisesti merkitseviä ja ilmaisevat lohkorakenteen.
+\par
+Rekursiivinen funktio F\#:ssa on merkittävä avainsanalla rec. Esimerkiksi
+
+\begin{lstlisting}
+// tyhmä funktio joka palauttaa aina nolla
+let func a =
+  if a = 0 then
+    a
+  else
+    func a - 1
+\end{lstlisting}
+
+johtaa käännösvirheeseen "func is not defined". Muuttamalla määrittely muotoon
+
+\begin{lstlisting}
+let rec func a =
+  loput koodista
+\end{lstlisting} 
+ 
+kääntäjä hyväksyy koodin.
+
+\par
+
+F\# tukee häntärekursiota. Tutkimalla funktion
+
+\begin{lstlisting}
+let rec func a =
+  if a = 0 then
+    a
+  else
+    func (a - 1)
+\end{lstlisting}
+    
+kääntäjän generoimaa assembly-koodia, else-haarasta löydetään
+
+\begin{lstlisting}
+00CD0881  dec         dword ptr [ebp-4]  
+00CD0884  nop  
+00CD0885  jmp         00CD086D
+\end{lstlisting}
+
+eli arvoa vähennetään yhdellä ja hypätään funktion alkuun sen sijaan että kutsuttaisiin funktiota rekursiivisesti.
+\par
+Moniparadigmakielenä F\# tukee myös perinteisempiä toistolauseita. While-silmukan rakenne on
+
+\begin{lstlisting}
+while ehto do
+  koodia
+  koodia
+\end{lstlisting}
+
+ja esimerkiksi seuraava koodi tulostaa arvot välillä [a, 0]
+
+\begin{lstlisting}
+let while_func a =
+// mutable-avainsana määrittelee counterin muuttujaksi eikä vakioksi
+    let mutable counter = a     
+while counter >= 0 do
+            printfn "%A" counter
+            counter <- counter - 1 // <- on sijoitusoperaattori
+\end{lstlisting}
+
+For-silmukka poikkeaa C-perheen vastaavasta~\cite{msn_loops}:
+\\
+Perusrakenne on muotoa
+
+\begin{lstlisting}
+for begin to end do  
+   koodia
+\end{lstlisting}
+
+missä arvoa kasvatetaan yhdellä joka suorituskerralla. Kielestä löytyy myös downto-avainsana , jolla arvoa pienennetään yhdellä. Silmukkaa voidaan käyttää myös muodossa
+
+\begin{lstlisting}
+for value in expression1 .. step .. expression2 do
+\end{lstlisting}
+
+missä alku- ja lopetusarvot saadaan joistakin lausekkeista ja askellusväli määritetään vakiolla step. Askellusväli ei myöskään ole pakollinen. Sen puuttuessa askellusvälinä käytetään yhtä.
+\par
+Silmukalla voidaan käydä myös läpi listoja ja muita tietorakenteita muodossa
+
+\begin{lstlisting}
+for value in collection do
+\end{lstlisting} 
+ 
+Myös sekvenssejä voidaan hyödyntää for-silmukassa (esimerkki Microsoftin~\cite{msn_loops})
+
+\begin{lstlisting}
+let seq1 = seq { for i in 1 .. 10 -> (i, i*i) }
+for (a, asqr) in seq1 do
+  printfn "%d squared is %d" a asqr
+\end{lstlisting}
+
+Tämä tulostaa
+\\
+1 squared is 1
+2 squared is 4
+3 squared is 9
+4 squared is 16
+5 squared is 25
+6 squared is 36
+7 squared is 49
+8 squared is 64
+9 squared is 81
+10 squared is 100  
