@@ -36,6 +36,7 @@ function y() {
 }
 \end{lstlisting}
 
+
 F\#:ssa lohkorakenne sen sijaan on aidosti syvä: seuraavassa koodissa
 
 
@@ -59,7 +60,7 @@ let main argv =
     0
 \end{lstlisting}
 
-määritellään funktio outside, ja sen sisällä funktio inside. Ensimmäinen main-funktion tulostus tulostaa tekstin "30", kun taas jälkimmäinen johtaa käännösvirheeseen koska funktio inside on olemassa vain funktion outside määrittelyalueen sisällä.
+Määritellään funktio outside, ja sen sisällä funktio inside. Ensimmäinen main-funktion tulostus tulostaa tekstin "30", kun taas jälkimmäinen johtaa käännösvirheeseen koska funktio inside on olemassa vain funktion outside määrittelyalueen sisällä.
 
 Myös samannimisten muuttujien määrittely onnistuun sisemmissä lohkoissa. Esimerkiksi seuraava koodi
 
@@ -81,7 +82,7 @@ let main argv =
 
 tulostaa 25 70 25
 
-Sidonta
+\section{Sidonta}
 
 PHP:ssa kaarisulkeet eivät muodosta näkyvyysalueita, vaan näkyvyysalueiden rajoina toimivat funktiot ja luokat. Funktiot pääsevät lähtökohtaisesti käsiksi vain omiin paikallisiin muuttujiinsa~\cite{man_php_scope}. Luokan paikallinen funktio pääsee lisäksi käsiksi luokan paikallisiin muutujiin this-avainsanan avulla. Seuraava ohjelmaesimerkki demonstroi muuttujien näkyvyyttä:
 
@@ -157,13 +158,13 @@ let main argv =
 
 Tulostaa 666 123 666
 
-Mielenkiintoisena sivuhuomiona F\#:ssa ei ole parametrittomia funktioita. Ylläolevan koodin funktion binding_test määrittely oli aluksi
+Mielenkiintoisena sivuhuomiona F\#:ssa ei ole parametrittomia funktioita. Ylläolevan koodin funktion binding\_test määrittely oli aluksi
 
 \begin{lstlisting}
 let binding_test = printfn "%A" global_var
 \end{lstlisting}
 
-Tämä ei kuitenkaan määrittele funktiota binding_test vaan globaalin vakion binding_test, joka saa arvoksi funktion printfn paluuarvon eli Unitin. Tämä johtaa arvon 666 tulostamiseen ennen main-funktion suorittamista. Jos funktiolle ei haluta välittää arvoja, täytyy sen formaaliksi parametriksi antaa Unit, joka ilmaistaan sulkeilla (). Vastaavasti kutsukohdassa on  todelliseksi parametriksi annettava Unit eli sulkeet.
+Tämä ei kuitenkaan määrittele funktiota binding\_test vaan globaalin vakion binding\_test, joka saa arvoksi funktion printfn paluuarvon eli Unitin. Tämä johtaa arvon 666 tulostamiseen ennen main-funktion suorittamista. Jos funktiolle ei haluta välittää arvoja, täytyy sen formaaliksi parametriksi antaa Unit, joka ilmaistaan sulkeilla (). Vastaavasti kutsukohdassa on  todelliseksi parametriksi annettava Unit eli sulkeet.
 
 
 
@@ -196,7 +197,7 @@ $prime_sum = array_reduce(array_filter($arr, $is_prime), $sum);
 echo "sum = " . $prime_sum . "\n";
 \end{lstlisting}
 
-Aluksi luodaan taulukko arr, joka sisältää luvut yhdestä sataan ja muuttujaan is_prime sijoitetaan anonyymi funktio, joka ottaa parametrina yhden luvun ja palauttaa totuusarvon true jos ja vain jos parametri on alkuluku. Seuraavaksi taulukkoon arr sovelletaan array_filter funktiota suodatinfunktiolla is_prime. Filter-funktio kutsuu suodatinfunktiota vuorotellen kullakin taulukon arvolla ja poimii palautettavaan listaan ne alkiot, joilla suodatinfunktio palautti arvon true. Näin tuotettua lista sisältää siis kaikki alkuluvut jotka ovat pienempiä kuin 101. Tähän taulukkoon sovelletaan array_reduce-funktiota, reduktiofunktiolla sum, mikä palauttaa taulukon alkioiden summan. Lopuksi tulostetaan summa, joka on sijoitettu muuttujaan \$prime_sum. 
+Aluksi luodaan taulukko arr, joka sisältää luvut yhdestä sataan ja muuttujaan is\_prime sijoitetaan anonyymi funktio, joka ottaa parametrina yhden luvun ja palauttaa totuusarvon true jos ja vain jos parametri on alkuluku. Seuraavaksi taulukkoon arr sovelletaan array\_filter funktiota suodatinfunktiolla is\_prime. Filter-funktio kutsuu suodatinfunktiota vuorotellen kullakin taulukon arvolla ja poimii palautettavaan listaan ne alkiot, joilla suodatinfunktio palautti arvon true. Näin tuotettua lista sisältää siis kaikki alkuluvut jotka ovat pienempiä kuin 101. Tähän taulukkoon sovelletaan array\_reduce-funktiota, reduktiofunktiolla sum, mikä palauttaa taulukon alkioiden summan. Lopuksi tulostetaan summa, joka on sijoitettu muuttujaan \$prime\_sum. 
 \par
 Ohjelmaa suoritettaessa tulostuu: “sum = 1060” 
 
@@ -316,6 +317,7 @@ for (a, asqr) in seq1 do
 
 Tämä tulostaa
 \\
+\begin{lstlisting}
 1 squared is 1
 2 squared is 4
 3 squared is 9
@@ -326,3 +328,4 @@ Tämä tulostaa
 8 squared is 64
 9 squared is 81
 10 squared is 100  
+\end{lstlisting}
