@@ -1,0 +1,160 @@
+
+
+
+Nimetyt aliohjelmat
+
+F#:ssa funktiot m‰‰ritet‰‰n l‰hes samalla tavalla kuin (vakio)muuttujat. Siin‰ miss‰ vakiomuuttujien asetus tapahtuu seuraavasti
+  
+  let muuttujaNimi = arvo # muuttujalla siis todellakin on tyyppi, mutta k‰‰nt‰j‰ p‰‰ttelee sen kontekstista
+
+funktioiden m‰‰rittely tapahtuu puolestaan
+
+  let funktio parametri1 parametri2 =
+    koodia # t‰ss‰ edelleen syyt‰ muistaa ett‰ sisennys m‰‰rittelee lohkorakenteen
+
+T‰ss‰ voidaan nopeasti huomata ettei kieless‰ onnistu parametrittoman funktion m‰‰rittely. Jos parametriluettelo on tyhj‰, ei m‰‰ritet‰k‰‰n funktiota vaan (vakio)muuttuja. Funktioille voidaan kuitenkin m‰‰ritt‰‰ Unit-tyyppinen parametri (vrt. Scalan Unit-arvo) sulkeiden avulla seuraavasti:
+
+  let parametritonFunktio () = koodiÖ
+
+Vastaavasti funktioita kutsutaan F#:ssa seuraavasti
+
+  funktio param1 param2  # jos kaksiparametrinen funktio.
+
+Unit-tyyppinen parametri ilmoitetaan sulkeiden avulla kuten funktiom‰‰rittelyss‰:
+
+  funktio () # kutsutaan funktiota, jonka parametrityyppi on Unit
+
+Funktio voidaan myˆs m‰‰ritt‰‰ muodossa [1]
+
+  let funktio(a, b, c) = koodiaÖ
+
+jolloin funktiota kutsutaan muodossa
+
+  funktio(1, 2, 3)
+
+T‰ss‰ muodossa m‰‰ritellyt j‰senfunktiot tukevat myˆs nimettyj‰ parametreja [1], esimerkiksi
+  type Laskuri() =
+    member this.Laske(ensimmainen, toinen) = ensimmainen - toinen
+
+[<EntryPoint>] 
+let main argv =
+    let laskuri = Laskuri()
+    printfn "%A" (laskuri.Laske(3, 4))
+    printfn "%A" (laskuri.Laske(toinen = 4, ensimmainen = 3)) # sama kuin yll‰
+    0
+
+Kieli mahdollistaa myˆs valinnaiset (optional) argumentit metodeille. N‰m‰ merkit‰‰n aloittamalla nimi kysymysmerkill‰. N‰m‰ argumentit ovat kielen Optional-tyyppi‰, jolloin arvo
+tai sen puuttuminen voidaan m‰‰ritt‰‰ match-lausekkeen avulla. Kutsukohdassa voidaan hyˆdynt‰‰ nimettyj‰ parametreja haluttujen parametrien v‰litt‰miseksi
+
+type Luokka() =
+    member this.Metodi(?ensimmainen, ?toinen) = 
+         # match valitsee Some-haaran jos muuttujalla on jokin arvo, muutoin valitaan None-haara         
+         match ensimmainen with
+            | Some arvo -> printfn "Ensimm‰isen argumentin arvo %A" arvo
+            | None -> printfn "Ei ensimm‰ist‰ argumenttia" 
+         match toinen with
+            | Some arvo -> printfn "Toisen argumentin arvo %A" arvo
+            | None -> printfn "Ei toista argumenttia"
+         printfn "\n"        
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+
+    let laskuri = Luokka()
+    laskuri.Metodi()
+    laskuri.Metodi(ensimmainen = 5) # haluttu argumentti voidaan valita nimetyn parametrin avulla
+    laskuri.Metodi(toinen = 12)
+    laskuri.Metodi(ensimmainen = 1, toinen = 1323)
+    0
+    
+
+F#:n funktioparametrit ovat oletuksena immutaabeleja, mink‰ vuoksi se, v‰litet‰‰nkˆ n‰m‰ parametrit arvona vai viitteen‰ ei ole mielek‰s kysymys oletustapauksessa. Parametrit voidaan kuitenkin erikseen merkit‰ viiteparametreiksi byref-avainsanalla. T‰llˆin v‰litetyn parametrin t‰ytyy olla myˆs muutettavissa, eli se on m‰‰ritetty mutable-avainsanalla.
+Esimerkiksi seuraava ohjelma 
+
+let f(a:int byref)  = 
+    a <- a + 1
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+    let mutable arvo = 4
+    f(&arvo) # viiteparametri merkitt‰v‰, jolloin kutsukohdasta on selv‰‰ milloin muuttujan arvo saattaa muuttua funktiokutsun johdosta
+    printfn "%A" arvo
+    0  
+
+tulostaa 5
+
+
+Virheenhallinta
+
+F#:ssa poikkeustyyppi [2] voidaan m‰‰ritt‰‰ seuraavasti
+  exception Nimi of tyyppi
+  exception Nimi of tyyppi * tyyppi * tyyppi # useita tyyppej‰
+
+ja poikkeus luoda komennolla
+  raise(Nimi(argumentit-poikkeuksen-haluamilla-tyypeill‰))
+  
+esimerkiksi
+
+  exception OmaPoikkeus of string * int * float
+  
+  def func a = 
+    raise(OmaPoikkeus("Jotakin meni pieleen...", 10, 123.4))
+    
+
+F#:ssa on hieman Javamainen try\with\finally-rakenne poikkeusten k‰sittelyyn [3]. Suurena erona on kuitenkin se, ett‰ with ja finally -lohkot eiv‰t voi kuulua samaan try-lohkoon yht‰ aikaa. Jos kummallekin lohkolle on tarvetta, tarvitaan kaksi sis‰kk‰ist‰ try-lohkoa, kuten seuraavassa esimerkiss‰
+
+exception OmaPoikkeus of string * int * float
+exception ToinenPoikkeus of string
+
+let f arvo  =
+    if arvo > 10 then
+        raise(OmaPoikkeus("teksti‰", 123, 123.4))
+    else
+        raise(ToinenPoikkeus("abcdef"))
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+
+    try
+        try
+            f(5)
+        with   
+            | OmaPoikkeus(teksti, nro, floatNro) -> printfn "%A" (teksti, nro, floatNro)
+            | ToinenPoikkeus(str) -> printfn "%A" str
+    finally
+        printf "Viel‰ t‰nne"
+    0 
+
+T‰m‰ esimerkki tulostaa "abcdef" ja "Viel‰ t‰nne"
+
+
+Kieless‰ on myˆs viel‰ failwith-avainsana [4], joka automaattisesti luo Failure-tyyppisen, stringin hyv‰ksyv‰n poikkeuksen. N‰in omaa poikkeustyyppi‰ ei v‰ltt‰m‰tt‰ tarvitse m‰‰ritt‰‰. Esimerkiksi seuraava esimerkki
+
+let f arvo  =
+    if arvo = 0 then
+        failwith "Ei saa olla nolla"
+    else
+        printf "%A" "Ei ollut nolla"
+
+// m‰‰ritell‰‰n ohjelman aloituspiste. 
+[<EntryPoint>] 
+let main argv =
+    try
+        f(0)
+    with   
+        | Failure(str) -> printfn "%A" str
+    0 
+
+tulostaa tekstin "Ei saa olla nolla"
+
+    
+    
+
+
+1 https://msdn.microsoft.com/en-us/library/dd233213.aspx
+2 https://msdn.microsoft.com/en-us/library/dd233190.aspx
+3 https://msdn.microsoft.com/en-us/library/dd233218.aspx
+4 https://msdn.microsoft.com/en-us/library/dd233235.aspx
