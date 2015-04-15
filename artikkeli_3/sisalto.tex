@@ -1,0 +1,319 @@
+ \lstset{%
+        inputencoding=utf8,
+            extendedchars=true,
+            literate=%
+            {å}{{\r{a}}}1
+			{ä}{{\"a}}1
+			{ö}{{\"o}}1
+			{Å}{{\r{A}}}1
+			{Ä}{{\"A}}1
+			{Ö}{{\"O}}1
+}
+
+
+
+
+\section{Nimetyt aliohjelmat ja parametrinvälitys}
+
+\subsection{F\#}
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+F\#:ssa funktiot määritetään lähes samalla tavalla kuin (vakio)muuttujat. Siinä missä vakiomuuttujien asetus tapahtuu seuraavasti
+ 
+ 
+\begin{lstlisting} 
+  let muuttujaNimi = arvo # muuttujalla siis todellakin on tyyppi, mutta kääntäjä päättelee sen kontekstista
+\end{lstlisting}
+
+funktioiden määrittely tapahtuu puolestaan
+
+\begin{lstlisting}
+  let funktio parametri1 parametri2 =
+    koodia # tässä edelleen syytä muistaa että sisennys määrittelee lohkorakenteen
+\end{lstlisting}
+
+Tässä voidaan nopeasti huomata ettei kielessä onnistu parametrittoman funktion määrittely. Jos parametriluettelo on tyhjä, ei määritetäkään funktiota vaan (vakio)muuttuja. Funktioille voidaan kuitenkin määrittää Unit-tyyppinen parametri (vrt. Scalan Unit-arvo) sulkeiden avulla seuraavasti:
+
+\begin{lstlisting}
+  let parametritonFunktio () = koodi…
+\end{lstlisting}
+
+Vastaavasti funktioita kutsutaan F\#:ssa seuraavasti
+
+\begin{lstlisting}
+  funktio param1 param2  # jos kaksiparametrinen funktio.
+\end{lstlisting}
+
+
+Unit-tyyppinen parametri ilmoitetaan sulkeiden avulla kuten funktiomäärittelyssä:
+
+\begin{lstlisting}
+  funktio () # kutsutaan funktiota, jonka parametrityyppi on Unit
+\end{lstlisting}
+
+Funktio voidaan myös määrittää muodossa~\cite{msn_params}
+
+\begin{lstlisting}
+  let funktio(a, b, c) = koodia…
+\end{lstlisting}
+
+jolloin funktiota kutsutaan muodossa
+
+\begin{lstlisting}
+  funktio(1, 2, 3)
+\end{lstlisting}
+
+Teknisesti (1, 2, 3) on kolmikko tyyppiä int * int * int (missä * on Karteesinen tulo). Näin ollen parametrilista voi yhdistellä molempia tapoja vapaasti, esimerkiksi seuraavaan tapaan:
+
+\begin{lstlisting}
+let f (a,b,c) (d,e) = a*b*c + d*e #funktion f tyyppi on nyt int*int*int -> int*int
+\end{lstlisting}
+
+Yllä esitettyä funktiota voitaisiin kutsua vaikkapa näin: f (1,2,3) (4,5).
+
+Monikkojen avulla määritellyt jäsenfunktiot tukevat myös nimettyjä parametreja~\cite{msn_params}, esimerkiksi
+
+\begin{lstlisting}
+  type Laskuri() =
+    member this.Laske(ensimmainen, toinen) = ensimmainen - toinen
+
+[<EntryPoint>]
+let main argv =
+    let laskuri = Laskuri()
+    printfn "%A" (laskuri.Laske(3, 4))
+    printfn "%A" (laskuri.Laske(toinen = 4, ensimmainen = 3)) # sama kuin yllä
+    0
+\end{lstlisting}
+
+Kieli mahdollistaa myös valinnaiset (optional) argumentit metodeille. Nämä merkitään aloittamalla nimi kysymysmerkillä. Nämä argumentit ovat kielen Optional-tyyppiä, jolloin arvo
+tai sen puuttuminen voidaan määrittää match-lausekkeen avulla. Kutsukohdassa voidaan hyödyntää nimettyjä parametreja haluttujen parametrien välittämiseksi
+
+\begin{lstlisting}
+type Luokka() =
+    member this.Metodi(?ensimmainen, ?toinen) =
+         # match valitsee Some-haaran jos muuttujalla on jokin arvo, muutoin valitaan None-haara         
+         match ensimmainen with
+                | Some arvo -> printfn "Ensimmäisen argumentin arvo %A" arvo
+                | None -> printfn "Ei ensimmäistä argumenttia"
+         match toinen with
+                | Some arvo -> printfn "Toisen argumentin arvo %A" arvo
+                | None -> printfn "Ei toista argumenttia"
+         printfn "\n"        
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+
+    let laskuri = Luokka()
+    laskuri.Metodi()
+    laskuri.Metodi(ensimmainen = 5) # haluttu argumentti voidaan valita nimetyn parametrin avulla
+    laskuri.Metodi(toinen = 12)
+    laskuri.Metodi(ensimmainen = 1, toinen = 1323)
+    0
+\end{lstlisting}
+
+Tässä esimerkkitapauksessa tulostuu ensiksi siis “Ensimmäisen argumentin arvo 5” ja “Ei toista argumenttia” ensimmäisen funktiokutsun yhteydessä ja “Ensimmäisen argumentin arvo 1” ja “Toisen argumentin arvo 1323” toisen funktiokutsun yhteydessä.
+
+F\#:n funktioparametrit ovat oletuksena immutaabeleja, minkä vuoksi se, välitetäänkö nämä parametrit arvona vai viitteenä ei ole mielekäs kysymys oletustapauksessa. Parametrit voidaan kuitenkin erikseen merkitä viiteparametreiksi byref-avainsanalla. Tällöin välitetyn parametrin täytyy olla myös muutettavissa, eli se on määritetty mutable-avainsanalla.
+Esimerkiksi seuraava ohjelma
+
+\begin{lstlisting}
+let f(a:int byref)  =
+    a <- a + 1
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+    let mutable arvo = 4
+    f(&arvo) # viiteparametri merkittävä, jolloin kutsukohdasta on selvää milloin muuttujan arvo saattaa muuttua funktiokutsun johdosta
+    printfn "%A" arvo
+    0  
+\end{lstlisting}
+
+tulostaa 5
+
+
+\subsection{PHP}
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+
+PHP-kielessä funktiot ovat ensisijainen väline aliohjelmien toteuttamiseen. Luokat tarjoavat mahdollisuuden funktioiden ja muuttujien kapselointiin. Parametrinvälitys on erityisen tärkeässä roolissa PHP:ssä, sillä funktiot ovat litteitä eikä niiden sisältä voi viitata ympäröivän leksikaalisen tai dynaamisen näkyvyysalueen muuttujiin (ks. artikkeli 2).
+
+PHP:ssä käytetään parametrien ja paluuarvojen välityksessä oletusarvoisesti arvosemantiikkaa~\cite{man_php_args}. Funktio kopioi välitettävän parametrin arvon omaan paikalliseen muuttujaansa, eikä välitetyn parametrin arvo muutu vaikka funktion paikallista arvoa muutettaisiinkin.
+
+Vaihtoehtoisesti parametrinvälityksessä voidaan käyttää viitesemantiikkaa~\cite{man_php_args}, esimerkiksi seuraavaan tapaan: 
+
+\begin{lstlisting}
+function lisaa_yhdella(&$luku) {
+    $luku++;
+}
+
+$luku = 3;
+lisaa_yhdella($luku);
+echo "luku = " . $luku . "\n";
+\end{lstlisting}
+
+Edellinen ohjelma tulostaa suoritettaessa viestin: “luku = 4”.
+
+Toisaalta myös paluuarvojen välityksessä voidaan käyttää viitesemantiikkaa~\cite{man_php_ret_ref}. Seuraava esimerkki demonstroi, miten funktion staattista muuttujaa voidaan muokata funktion ulkopuolelta, kun funktio palauttaa sen viitteen.
+
+\begin{lstlisting}
+function &test() {
+    static $arr = array();
+    array_push($arr, 'foo');
+    return &$arr;
+}
+
+$arr = test();
+array_push($arr, 'bar');
+$arr = test();
+print_r($arr);
+\end{lstlisting}
+
+Edellinen ohjelma tulostaa suoritettaessa:
+\begin{lstlisting}
+Array
+(
+    [0] => foo
+    [1] => bar
+    [2] => foo
+)
+\end{lstlisting}
+
+mistä nähdään, että test-funktion paikallista staattista muuttujaa arr on tosiaankin päästy muokkaamaan funktion ulkopuolelta. On syytä huomata, että \&-merkki tulee laittaa sekä funktion nimen eteen, että palautettavan lausekkeen eteen, muutoin käytössä on arvosemantiikka.
+
+PHP:n parametreille voidaan antaa oletusarvoja~\cite{man_php_args}. Oletusarvon omaavien muuttujien tulee sijaita funktion parametrilistan lopussa, siis oletusarvottomien parametrien oikealla puolella. Seuraava esimerkki demonstroi oletusarvojen käyttöä:
+
+\begin{lstlisting}
+function tulosta($nimi, $luku = 4, $taulukko = array("a", "b")) {
+    $out = "Nimi: " . $nimi . " Luku: " . $luku . " Kirjaimet:";
+    foreach($taulukko as $i) $out .= " " . $i;
+    return $out;
+}
+
+echo tulosta("Jeppe", 8) . "\n";
+\end{lstlisting}
+
+Ohjelmaa suoritettaessa tulostuu: “Nimi: Jeppe Luku: 8 Kirjaimet: a b”.
+
+\section{Virheenhallinta}
+
+\subsection{F\#}
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+F\#:ssa poikkeustyyppi~\cite{msn_exceptions} voidaan määrittää seuraavasti
+
+\begin{lstlisting}
+  exception Nimi of tyyppi
+  exception Nimi of tyyppi * tyyppi * tyyppi # useita tyyppejä
+\end{lstlisting}
+
+ja poikkeus luoda komennolla
+\begin{lstlisting}
+  raise(Nimi(argumentit-poikkeuksen-haluamilla-tyypeillä))
+\end{lstlisting}
+
+esimerkiksi
+\begin{lstlisting}
+  exception OmaPoikkeus of string * int * float
+ 
+  def func a =
+    raise(OmaPoikkeus("Jotakin meni pieleen...", 10, 123.4))
+\end{lstlisting}
+
+F\#:ssa on hieman Javamainen try\with\finally-rakenne poikkeusten käsittelyyn~\cite{msn_try}. Suurena erona on kuitenkin se, että with ja finally -lohkot eivät voi kuulua samaan try-lohkoon yhtä aikaa. Jos kummallekin lohkolle on tarvetta, tarvitaan kaksi sisäkkäistä try-lohkoa, kuten seuraavassa esimerkissä
+
+\begin{lstlisting}
+exception OmaPoikkeus of string * int * float
+exception ToinenPoikkeus of string
+
+let f arvo  =
+    if arvo > 10 then
+        raise(OmaPoikkeus("tekstiä", 123, 123.4))
+    else
+        raise(ToinenPoikkeus("abcdef"))
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+
+    try
+            try
+                    f(5)
+            with   
+                    | OmaPoikkeus(teksti, nro, floatNro) -> printfn "%A" (teksti, nro, floatNro)
+                    | ToinenPoikkeus(str) -> printfn "%A" str
+    finally
+            printf "Vielä tänne"
+    0
+\end{lstlisting}
+
+Tämä esimerkki tulostaa "abcdef" ja "Vielä tänne"
+
+
+Kielessä on myös vielä failwith-avainsana~\cite{msn_failwith}, joka automaattisesti luo Failure-tyyppisen, stringin hyväksyvän poikkeuksen. Näin omaa poikkeustyyppiä ei välttämättä tarvitse määrittää. Esimerkiksi seuraava esimerkki
+
+\begin{lstlisting}
+let f arvo  =
+    if arvo = 0 then
+            failwith "Ei saa olla nolla"
+    else
+            printf "%A" "Ei ollut nolla"
+
+// määritellään ohjelman aloituspiste.
+[<EntryPoint>]
+let main argv =
+    try
+            f(0)
+    with   
+            | Failure(str) -> printfn "%A" str
+    0
+\end{lstlisting}
+
+tulostaa tekstin "Ei saa olla nolla"
+
+    
+\subsection{PHP}
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+
+PHP:n poikkeuksien käsittely on samankaltaista kuin Javassa ja C++:ssa. Alirutiinit voidaan määritellä “heittämään” (throw) poikkeuksia, joita käsitellään try-catch-rakenteen avulla~\cite{man_php_exceptions}. Esimerkiksi:
+
+\begin{lstlisting}
+function jaa($jaettava, $jakaja) {
+    if($jakaja == 0) {
+        throw new Exception(‘Nollalla jakaminen ei onnistu’);
+    }
+    return $jaettava / $jakaja;
+}
+
+try {
+    echo jaa(1, 2) . ‘\n’;    
+} catch(Exception $e) {
+    echo $e->getMessage() . ‘\n’;
+} finally {
+    echo “Ohjelma suoritettu.\n”;
+}
+\end{lstlisting}
+
+Esimerkissä funktio jaa heittää poikkeuksen, jos parametri jakaja on arvoltaan 0. Try-catch rakenteessa poikkeus otetaan vastaan. Joka tapauksessa suoritetaan ohjelman finally-lohko, joka tulostaa merkkijonon “Ohjelma suoritettu.”
+
+Ohjelmoijan on mahdollista tehdä omia poikkeuksia periytymisen avulla~\cite{man_php_extended_exceptions}. Käyttäjä voi luoda oman luokkansa, joka perii Exception-luokan ominaisuudet. Esimerkiksi class OmaPoikkeus extends Exception { }. Tällöin poikkeus heitetään funktiossa komennolla throw new OmaPoikkeus(‘virheviesti’).
