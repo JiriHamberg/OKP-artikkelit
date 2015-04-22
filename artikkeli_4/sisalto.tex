@@ -1,0 +1,256 @@
+ \lstset{%
+        inputencoding=utf8,
+            extendedchars=true,
+            literate=%
+            {å}{{\r{a}}}1
+			{ä}{{\"a}}1
+			{ö}{{\"o}}1
+			{Å}{{\r{A}}}1
+			{Ä}{{\"A}}1
+			{Ö}{{\"O}}1
+}
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+
+\section{F\#}
+
+\subsection{Tyypitys ja tyyppipäättely}
+
+F\# on vahvasti ja staattisesti tyypitetty ohjelmointikieli~\cite{wiki_fs_programming}. F\#:ssa on käytössä tyyppipäättely, jonka ansiosta kääntäjä päättelee arvojen, muuttujien, parametrien ja paluuarvojen tyypit useimmissa tilanteissa automaattisesti, ellei ohjelmoija ole ilmaissut tyyppiä eksplisiittisesti~\cite{msn_type_inference}. Esimerkiksi seuraavanlaisen funktion määritelmän tapauksessa
+
+\begin{lstlisting}
+let f a b = a + b
+\end{lstlisting}
+
+kääntäjä päättelee f:lle seuraavanlaisen tyypin:
+
+\begin{lstlisting}
+f : a:int -> b:int -> int
+\end{lstlisting}
+
+mikä tarkoittaa, että f on funktio, joka ottaa parametreinaan kaksi kokonaislukua ja palauttaa kokonaisluvun. Tyyppipäättely ei rajoitu vain funktion omaan leksikaaliseen ympäristöön, vaan tyyppipäättelyn tulokseen vaikuttavat kaikki funktioon viittaavat määritelmät, kuten seuraavassa esimerkissä:
+
+\begin{lstlisting}
+let f a b = a + b
+let g = f 3.0 2.0
+\end{lstlisting}
+
+Nyt kääntäjä tekee seuraavat tyyppipäätelmät:
+
+\begin{lstlisting}
+f : a:float -> b:float -> float
+g : float
+\end{lstlisting}
+
+F\# kielen tyypitys on varsin vahva. Esimerkiksi numeerisille tyypeille ei suoriteta implisiittisiä tyyppimuunnoksia. Siksi seuraava johtaa käännösvirheeseen: 
+
+\begin{lstlisting}
+3.0 + 2
+\end{lstlisting}
+
+Kääntäjä tuottaa virheilmoituksen: “The type 'int' does not match the type 'float'”. Implisiittisten tyyppimuunnosten puuttuminen ja tyyppipäättely voivat yhdessä johtaa F\#-kieleen tottumattomalle ohjelmoijalle varsin erikoiselta vaikuttaviin virheisiin. Esimerkiksi seuraava ohjelma johtaa käännösvirheeseen:
+
+\begin{lstlisting}
+let f a b = a + b
+let g = f 3.0 2.0
+let h = f 3 2
+\end{lstlisting}
+
+Edellisessä esimerkissä kääntäjä päättelee g:n määritelmän perusteella, että funktion f: tyypin on oltava f : a:float -> b:float -> float, jolloin h:n määritelmä on virheellinen, sillä int-tyyppistä arvoa ei voida implisiittisesti muuntaa float-tyyppiseksi F\#:ssa.
+
+Tyyppipäättely ei välttämättä toimi kaikissa tilanteissa. Tällöin ohjelmoija voi kirjoittaa arvoille tyyppiannotaatiota, jotka kääntäjä huomio tyyppipäättelyä suorittaessaan. Esimerkiksi seuraava määritelmä johtaa käännösvirheeseen:
+
+\begin{lstlisting}
+let f x = x.Length #käännösvirhe!
+\end{lstlisting}
+
+Lisäämällä parametrille x tyyppiannotaatio, päästään virheestä eroon:
+
+\begin{lstlisting}
+let f (x: string) = x.Length #f: string -> int
+\end{lstlisting}
+
+
+\subsection{Algebralliset ja rekursiiviset tyypit sekä tyyppiparametrit}
+
+F\# tukee algebrallisia ja rekursiivisia tyyppejä~\cite{wiki_algebraic_data_type}. Yksinkertainen viikonpäivät koodaava summatyyppi voidaan määritellä seuraavasti:
+
+\begin{lstlisting}
+type viikonpaiva = Ma | Ti | Ke | To | Pe | La | Su
+\end{lstlisting}
+
+Edellinen määritelmä tarkoittaa, että viikonpaiva on tyyppi, jonka jäseniä ovat täsmälleen Ma, Ti, Ke, To, Pe, La ja Su.
+
+Tulotyypit ovat rakenteisia tyyppejä, joiden arvojen joukko on muiden tyyppien arvojoukkojen Karteesinen tulo. Tulotyypin tekijätyypeiksi kelpaavat siis F\#:n alkeistyyppien (ks. artikkeli 1) ohella myös rakenteiset tyypit. Yksinkertainen merkkijonojen ja kokonaislukujen tulotyyppi voidaan määritellä esimerkiksi seuraavasti: 
+
+\begin{lstlisting}
+type henkilo = Henkilo of string * int
+\end{lstlisting}
+
+Edellinen määrittelee tyypin henkilo, jonka jäseniä ovat kaikki datakonstruktorilla Henkilo tuotetut string-int -parit. Algebrallisia tyyppejä käytetään tyypillisesti yhdessä hahmonsovituksen kanssa. Seuraava ohjelmaesimerkki havainnollistaa hahmonsovituksen periaatteita yllä määritellyn henkilo-tyypin tapauksessa:
+
+\begin{lstlisting}
+type henkilo = Henkilo of string * int
+let nimi = function #nimi on tyyppiä henkilo -> string
+  | Henkilo (a, _) -> a
+
+[<EntryPoint>]
+let main args =
+  let aino = Henkilo ("Aino", 35)
+  printfn "Hei %s" (nimi aino)
+  0
+\end{lstlisting}
+
+Yllä oleva ohjelma tulostaa suoritettaessa viestin “Hei Aino”.
+
+Summa- ja tulotyyppejä voidaan yhdistellä mielivaltaisiksi algebrallisiksi tyypeiksi. Algebralliset tyypit voivat F\#-kielessä olla myös rekursiivisia, eli algebrallisen tyypin T tulotyypit voivat sisältää jäseninään tyyppiä T. Seuraavassa esimerkissä on määritelty tyyppi puu, joka on kokonaislukuarvoinen binääripuu ja funktio puuSumma, joka laskee puu-tyyppisen parametrin lehtisolmujen summan.	
+
+\begin{lstlisting}
+type puu =
+  | Lehti of int
+  | Oksa of puu*puu
+
+let rec puuSumma = function
+  | Lehti (x) -> x
+  | Oksa (p1, p2) -> puuSumma p1 + puuSumma p2
+
+[<EntryPoint>]
+let main args =
+  let p = Oksa(
+	Oksa(
+  		Lehti(4),
+  		Lehti(3)
+	),
+	Lehti(5)
+  )
+  printfn "puuSumma =  %d" (puuSumma p)
+  0
+\end{lstlisting}
+
+Edellisen ohjelman suorittaminen tuottaa tulosteen “puuSumma =  12”. 
+\par
+F\# tukee myös geneerisiä tyyppejä tyyppiparametrien muodossa~\cite{msn_generics}. Seuraavassa esimerkissä edellisen esimerkin binääripuusta on tehty geneerinen versio. Myös puuSumma-funktiosta on tehty geneerinen versio.
+
+\begin{lstlisting}
+type puu<'a> =
+  | Lehti of 'a
+  | Oksa of puu<'a>*puu<'a>
+
+let rec puuSumma<'a> (p: puu<'a>) (f: 'a -> int) = match p with
+  | Lehti (x) -> f x
+  | Oksa (p1, p2) -> puuSumma p1 f + puuSumma p2 f
+
+[<EntryPoint>]
+let main args =
+  let p = Oksa(
+	Oksa(
+  	Lehti("aaaaaa"),
+  	Lehti("bbb")
+	),
+	Lehti("c")
+  )
+  #lasketaan puun sisältämien merkkijonojen pituuksien summa
+  printfn "puuSumma =  %d" (puuSumma p (fun (x: string) -> x.Length))
+  0 #pääohjelman paluuarvo
+\end{lstlisting}
+
+Yllä olevassa ohjelmassa on määritelty geneerinen binääripuu-tyyppi “puu”, jolla on tyyppiparametri ‘a ja funktio puuSumma, joka ottaa parametreinaan tyyppiä ‘a sisältävän binääripuun ja funktion f, joka muuttaa ‘a-tyyppisen arvon kokonaisluvuksi. Pääohjelmassa on määritelty merkkijonoja sisältävä binääripuu, johon on sovellettu funktiota puuSumma puun sisältämien merkkijonojen pituuksien summan laskemiseksi. Ohjelman suorittaminen tuottaa tulosteen “puuSumma =  10”. Tyyppipäättely tekee tyyppiparametrien käytöstä varsin miellyttävää: pääohjelmassa ei tarvitse erikseen kertoa, että p on tyyppiä puu<string>, vaan tyyppiparametrin ‘a tyyppi päätellään automaattisesti. 
+\par
+Tyyppiekvivalenssi on F\#-kielessä läpinäkymätöntä: esimerkiksi kahden tulotyypin, joilla on samat tulontekijätyypit välillä ei vallitse tyyppiekvivalenssia. Tulotyypit erotetaan hahmontunnistuksessa toisistaan datakonstruktorien avulla.
+
+
+\section{PHP}
+
+\lstset{language=PHP,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible}
+
+PHP on dynaamisesti tyypitetty kieli, joten muuttujille ei erikseen tarvitse antaa tyyppiä ja muuttujan sisältämän arvon tyyppi voi muuttua ajonaikaisesti. Esimerkiksi seuraava koodi~\cite{man_php_types}
+
+\begin{lstlisting}
+$a = 5;
+echo gettype($a);
+
+$a = "Terve";
+echo gettype($a);
+\end{lstlisting}
+
+tulostaa “integer” ja “string”.
+\par
+Arvoilla kuitenkin on tyyppi kuten yllä olevasta koodista nähdään. PHP tukee neljää skalaarityyppiä: kokonaislukuja (integer), liukulukuja (float), totuusarvoja (boolean) ja merkkijonoja (string). Näiden lisäksi tukee taulukoita ja olioita (array, object) rakenteisina tyyppeinä. Kieli sisältää vielä kaksi erikoistyyppiä, null ja resource. Null-tyypin ainoa arvo on NULL, joka ilmaisee arvon puuttumisen. Arvo voi olla vain sellaisilla muuttujilla, joille ei ole asetettu arvoa tai joiden arvo on poistettu unset-funktiolla tai sijoittamalla muuttujaan NULL. Resource-tyyppi puolestaan on erikoistyyppi kielen ulkopuolisille resursseille kuten tiedostokahvoille tai tietokanta- ja verkkoyhteyksille.
+\par
+PHP sisältää runsaasti implisiittisiä muunnoksia, joten se on tyypitykseltään heikko. Esimerkiksi seuraava koodinpätkä
+
+\begin{lstlisting}
+$a = "25";
+$b = 20;
+$c = $a + $b;
+
+echo $c;
+\end{lstlisting}
+
+tulostaa 45, koska + -operaattori pyrkii muuntamaan operandinsa kokonaisluvuiksi. Sivuhuomiona tässä voi mainita, että katenaatio-operaatio ilmaistaan kielessä poikkeuksellisesti pisteellä: Jos ylläoleva koodi olisikin seuraava
+
+\begin{lstlisting}
+$a = "25";
+$b = 20;
+$c = $a . $b;
+
+echo $c;
+\end{lstlisting}
+
+olisi tulostunut 2520.
+\par
+Implisiittiset konversiot aiheuttavat joskus hyvin vaikeasti löydettäviä virheitä. Esimerkiksi seuraava koodinpätkä
+
+\begin{lstlisting}
+$a = 0;
+$b = "testi123";
+
+echo var_dump($a == $b);
+\end{lstlisting}
+
+tulostaa boolean(true), eli ehto toteutuu. Tämä johtuu siitä, että PHP muuntaa muuttujan \$b merkkijonoksi koska \$a on merkkijono. Jos merkkijonoa ei voi muuntaa numeroksi, se palauttaa arvon nolla, kuten nyt käy koska “testi123” ei ala luvulla. Näin vertailu on tosi. Toisaalta myös seuraavassa koodinpätkässä
+
+\begin{lstlisting}
+$a = 1234;;
+$b = "1234ABCDEF";
+
+echo var_dump($a == $b);
+\end{lstlisting}
+
+ehto on tosi: koska \$b alkaa luvulla, muunnetaan se kokonaisluvuksi 1234 ja vertailu on jälleen tosi. 
+\par
+Vertailuoperaattoreiden kohdalla tyyppimuunnokset ovat joskus myös odottamattomia. Esimerkiksi seuraavassa koodissa~\cite{man_php_typejuggling}
+
+\begin{lstlisting}
+echo var_dump("123" < "456A");
+echo var_dump("456A" < "78");
+echo var_dump("78" < "123");
+\end{lstlisting}
+
+jokainen ehto on tosi. Tämän vuoksi seuraavassa koodissa~\cite{reddit_example}
+
+\begin{lstlisting}
+$a = array("123", "456A", "78"); sort($a); print_r($a);
+$b = array("456A", "78", "123"); sort($b); print_r($b);
+\end{lstlisting}
+
+ensimmäisen taulukon järjestys on 123, 456A ja 78 kun taas toisen taulukon järjestys on 456A, 78, 123. PHP:n tyyppimuunnosten kanssa on siis oltava todella tarkkana.
+
+
+
+%http://en.wikipedia.org/wiki/F_Sharp_%28programming_language%29
+%https://msdn.microsoft.com/en-us/library/dd233180.aspx
+%http://en.wikipedia.org/wiki/Algebraic_data_type
+%https://msdn.microsoft.com/en-us/library/dd233215.aspx
+%http://php.net/manual/en/language.types.intro.php 
+%http://php.net/manual/en/language.types.type-juggling.php
+%http://www.reddit.com/r/lolphp/comments/2fxgu7/the_codeless_code_case_161_triangle_the_abbey_of/cke7cla
+
