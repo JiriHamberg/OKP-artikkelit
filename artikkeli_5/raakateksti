@@ -1,0 +1,9 @@
+
+
+
+Valinta PHP:n ja F#:n välillä riippuu pitkälti siitä, millaista ohjelmistoa on tarkoitus tuottaa. PHP on alusta asti tarkoitettu webpalvelinohjelmointiin, jolloin PHP on luonteva valinta tämän tyyppisiin ohjelmistoihin. Kielenä PHP on kuitenkin monin tavoin huonompi kuin F#. Dynaaminen tyypitys vaikeuttaa käännösaikaisia tarkistuksia, jolloin tietyt virheet huomataan vasta ajonaikasesti kun kyseistä koodia suoritetaan. Lisäksi PHP:n implisiittiset muunnosten tyyppien välillä voivat aiheuttaa outoja virheitä. Esimerkiksi PHP:n vertailuoperaattorit eivät ole transitiivisia, jolloin esimerkiksi kahden taulukon järjestäminen voi johtaa eri tuloksiin, vaikka taulukot sisältäisivät samat alkiot eri järjestyksessä. 
+
+F#:n tyyppijärjestelmä puolestaan on hyvin tiukka. Tämä voi aluksi johtaa turhautumiseen, kun näennäisesti toimiva koodi johtaakin käännösvirheeseen. Tämä kuitenkin eliminoi huomattavan määrän virhelähteitä, mikä on esimerkiksi suurissa projekteissa erittäin hyvä asia. Lisäski esimerkiksi koodin refaktorointi on helpompaa, kun huolimattomuusvirheet jäävät välittömästi kiinni.
+
+F# hyötyy myös suunnattomasti siitä, että sitä suoritetaan CLR-virtuaalikoneella. Tämä mahdollistaa muilla CLR-kielillä kirjoitettujen kirjastojen helpon käyttämisen F#-koodista. Kieli hyötyy myös CLR-virtuaalikoneen eri optimoinneista kuten JIT-kääntämisestä, jolloin F#:lla kirjoitetut ohjelmat voivat olla parhaimmillaan yhtä nopeita kuin suoraan konekielelle käännetyt ohjelmat. PHP:n refenressi-implementaatio puolestaan on puhtaasti tulkattu, jolloin sillä suoritetut PHP-ohjelmat ovat merkittävästi hitaampia. Lisäksi ulkopuolisten kirjastojen käyttäminen ei ole yhtä helppoa.
+ 
